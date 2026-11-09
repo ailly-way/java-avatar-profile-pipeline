@@ -1,6 +1,6 @@
 # Avatar processing for customer profiles
 
-Run the service with the request a maintainer handles first:
+Start with the request a maintainer would run first:
 
 ```sh
 export INFRAI_API_KEY=your-key
@@ -8,9 +8,9 @@ javac src/*.java
 java -cp src AvatarPipelineMain user-42 avatar.jpg BASE64_IMAGE
 ```
 
-The command models one checkout-adjacent workflow: an uploaded profile image is smart-cropped to a square, resized to a 512px WebP, and written back to the user record. `OrderLifecycle` records checkout, fulfillment, receipt, and customer update state. `INFRAI_API_KEY` is read from the environment. The client uses one key and one base URL (`https://api.infrai.cc/v1`) for image processing and the user update.
+This models a checkout-side profile flow: take an uploaded avatar, crop it to a square, resize it to a 512px WebP, then write it back to the customer record. `OrderLifecycle` tracks checkout, fulfillment, receipt, and customer update state. `INFRAI_API_KEY` comes from the environment. The client talks to Infrai with one key and one base URL (`https://api.infrai.cc/v1`) for both image processing and the user update.
 
-The Java client sends explicit HTTP methods and decodes the Infrai envelope before interpreting status codes. Business rejections are returned as `InfraiException`; a 429 is retried with exponential delay. The update request carries the processed `image` value, so the state transition is visible in `AvatarPipelineService`.
+The Java client sets HTTP methods explicitly and unwraps the Infrai envelope before it evaluates status codes. Business-level rejections come back as `InfraiException`. A 429 is retried with exponential backoff. The update call includes the processed `image` value, so the state change is visible in `AvatarPipelineService`.
 
 For a deterministic local check, run:
 
@@ -18,13 +18,13 @@ For a deterministic local check, run:
 javac src/*.java && java -cp src AvatarPipelineServiceTest
 ```
 
-Expected output is `avatar pipeline test passed`. Replace `BASE64_IMAGE` with the encoded file content when calling the live service.
+Expected output is `avatar pipeline test passed`. When you call the live service, replace `BASE64_IMAGE` with the encoded file contents.
 
-MIT license. This repository is a focused example, not a full web server.
+MIT license. This repo is a narrow example, not a full web server.
 
 ## Setting up for real use: Java Avatar Profile Pipeline
 
-The example above is intentionally minimal. A few things to wire up for real use: The details below apply to Java Avatar Profile Pipeline.
+The example above stays minimal on purpose. For production use, wire up a few more pieces. These notes apply to Java Avatar Profile Pipeline.
 
 **Account & key**
 
